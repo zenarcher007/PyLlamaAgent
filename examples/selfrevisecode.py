@@ -2,7 +2,7 @@
 
 import sys
 import re
-from PyLlamaAgent import Agent
+from PyLlamaAgent import Agent, Endpoint, OllamaModel
 
 def get_code_blocks_contents(text):
     pattern = r"```(.*?)```"
@@ -13,11 +13,14 @@ def get_code_blocks_contents(text):
         return None
 
 def main(argv):
+  endpoint = Endpoint("http://localhost:11434/api/generate")
+  model = OllamaModel(tag = "codellama:13b")
+
   # (Prompts developed for learning and experimentation purposes outside of class)
-  writer = Agent("Writer", "codellama:13b", "You are a code-writer Agent. You are to revise your entire program in a code block, taking the user feedback into consideration. The program should find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix. Not much explanation is necessary.") #"You are a philosopher arguing why artificial intelligence will have a POSITIVE impact on the world. You are to carefully consider and critique the argument of the philosopher debating the negative impacts, and argue your counterclaim in a critical, context-aware and evidence-backed manner.")
+  writer = Agent("Writer", model, endpoint, system_prompt="You are a code-writer Agent. You are to revise your entire program in a code block, taking the user feedback into consideration. The program should find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix. Not much explanation is necessary.") #"You are a philosopher arguing why artificial intelligence will have a POSITIVE impact on the world. You are to carefully consider and critique the argument of the philosopher debating the negative impacts, and argue your counterclaim in a critical, context-aware and evidence-backed manner.")
   # On some models, I notice sometimes the checker becomes a "coach", attempting to provide encouragement to the writer. The writer then gets confused, thinks it is a sentient developer, and gets lazy.
 
-  checker = Agent("Checker", "codellama:13b", "The provided program should use dynamic programming to find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix. You are a code reviewer. Say whether the program meets the requirements, and state any potential issues you see. Do NOT highlight improvements on previous versions of the code unless those parts still need to be improved.") #"You are a code reviewer. Double-check the provided program. Say whether you think it meets the requirements, and state any issues you see using constructive critisism. You are not tutoring, but simply reviewing the work of the user while ensuring it will compile and produce the desired result. Positive encouragement isn't necessary, and all critisism is welcomed. The program should use dynamic programming to find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix.") #"You are a philosopher arguing why artificial intelligence will have a NEGATIVE impact on the world. You are to carefully consider and critique the argument of the philosopher debating the negative impacts, and argue your counterclaim in a critical, context-aware, and evidence-backed manner."
+  checker = Agent("Checker", model, endpoint, system_prompt = "The provided program should use dynamic programming to find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix. You are a code reviewer. Say whether the program meets the requirements, and state any potential issues you see. Do NOT highlight improvements on previous versions of the code unless those parts still need to be improved.") #"You are a code reviewer. Double-check the provided program. Say whether you think it meets the requirements, and state any issues you see using constructive critisism. You are not tutoring, but simply reviewing the work of the user while ensuring it will compile and produce the desired result. Positive encouragement isn't necessary, and all critisism is welcomed. The program should use dynamic programming to find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix.") #"You are a philosopher arguing why artificial intelligence will have a NEGATIVE impact on the world. You are to carefully consider and critique the argument of the philosopher debating the negative impacts, and argue your counterclaim in a critical, context-aware, and evidence-backed manner."
   r = writer.ask("Write a program for a dynamic algorithm in C++ which can find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix.")
   finalcode = None
   while "```" in str(r):
