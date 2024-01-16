@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#Copyright 2024 <Justin Douty>
+#Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import sys
 import re
 from PyLlamaAgent import Agent, Endpoint, OllamaModel
@@ -14,7 +19,7 @@ def get_code_blocks_contents(text):
 
 def main(argv):
   endpoint = Endpoint("http://localhost:11434/api/generate")
-  model = OllamaModel(tag = "codellama:13b")
+  model = OllamaModel(tag = "codellama:13b") # Note that one might expect to get better results with a more capable model
 
   # (Prompts developed for learning and experimentation purposes outside of class)
   writer = Agent("Writer", model, endpoint, system_prompt="You are a code-writer Agent. You are to revise your entire program in a code block, taking the user feedback into consideration. The program should find the optimal number of multiplications needed to compute a matrix chain product whose sequence of dimensions is (5, 3, 6, 4, 5, 2), and A4 is a 4x5 matrix. Not much explanation is necessary.") #"You are a philosopher arguing why artificial intelligence will have a POSITIVE impact on the world. You are to carefully consider and critique the argument of the philosopher debating the negative impacts, and argue your counterclaim in a critical, context-aware and evidence-backed manner.")
@@ -25,7 +30,7 @@ def main(argv):
   finalcode = None
   while "```" in str(r):
     finalcode = get_code_blocks_contents(r)
-    r = checker.ask("Say \"[GOOD]\" (in brackets and capital letters) at the VERY END of your statement if the code meets the requirements AND you don't have any suggestions for improving it, or else highlight any potential issues or syntax errors in the code\n\n:" + finalcode) # Highlight any potential issues in the provided code below, or say \"[GOOD]\" (in brackets and capital letters) if you think there is no way to further improve it:\n\n" + r)
+    r = checker.ask("If, and only if, the provided code meets the requirements, and you do not have any further suggestions for improvement or notice any syntax errors or potential logical errors in the code, then say \"[GOOD]\" (in brackets and capital letters) at the VERY END of your statement.")
     checker.clear_context() # Erase the checker's memory so it doesn't think it has to tutor the writer.
     if("[GOOD]" in r):
       #with open("out.cpp", "w") as out:
